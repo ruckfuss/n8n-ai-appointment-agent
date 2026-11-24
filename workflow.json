@@ -1,0 +1,124 @@
+{
+  "name": "24/7 AI Appointment Booking Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -368,
+        -144
+      ],
+      "id": "6bb4fda5-51df-400d-9d9e-34fa717d4ead",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the 24/7 AI Appointment Assistant for Smile Dental Clinic in London. Ask the patient politely for: 1) Treatment needed (Teeth Whitening is $199, Checkup is free), 2) Full Name, 3) Phone Number and preferred Date/Time. Once collected, use the Telegram tool to send the booking summary."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -144,
+        -144
+      ],
+      "id": "ff214f5e-00e9-4a08-a8af-9e70d3414ea2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -48,
+        64
+      ],
+      "id": "65424f65-e849-4206-a5e2-1302b997107a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $fromAI('Text', 'Send the patient full name, phone number, requested treatment, and preferred appointment date/time to the clinic owner once all details are confirmed.', 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        64
+      ],
+      "id": "59d60651-4a4e-4af4-9da5-08a170b3a546",
+      "name": "Send a text message in Telegram"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        64
+      ],
+      "id": "de73493b-f958-4ef5-a900-c6903050ea03",
+      "name": "Groq Chat Model"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message in Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
